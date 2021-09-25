@@ -3,15 +3,15 @@ import java.io.File
 // Пара ключ-значение
 class KeyValueElement {
     // поля
-    private var key: String = ""
-    private var value: String = ""
+    var key: String = ""
+    var value: String = ""
 
     // конструктор по умолчанию
     constructor() {
         key = ""
         value = ""
     }
-    // конструктор, создающий элемент по строке
+    // конструктор, создающий элемент по ключу и значению
     constructor(key: String, value: String) {
         this.key = key
         this.value = value
@@ -23,7 +23,7 @@ class KeyValueElement {
 
 
     // Разбить строку данных на ключ и значение и сохранить
-    private fun assign(string: String) {
+    fun assign(string: String): Boolean {
         val pattern = " -> ".toRegex()
         val result = pattern.find(string)
         var separator = 0
@@ -32,10 +32,11 @@ class KeyValueElement {
         else {
             key = ""
             value = ""
-            return // Нужно скидывать нечитаему строку в мусорный файл
+            return false // Нужно скидывать нечитаему строку в мусорный файл
         }
         key = string.substring(0,separator)
         value = string.substring(separator + 4)
+        return true
     }
 
     // toString() для записи в файл
@@ -49,7 +50,23 @@ class KeyValueElement {
 }
 
 class KeyValueDataBase {
-    var map: MutableMap<String,String> = mutableMapOf()
+    private var map: MutableMap<String,String> = mutableMapOf()
+    private val bootFile = "DataBase.txt"
+
+    // При создании загружает данные из bootFile
+    constructor() {
+        val elements = readData(bootFile)
+        for (element in elements)
+            addElement(element)
+    }
+
+    // промежуточное сохранение
+    fun saveData() {
+        val elements = mutableListOf<KeyValueElement>()
+        for (element in map)
+            elements.add(KeyValueElement(element.key, element.value))
+        writeData(bootFile, elements)
+    }
 
     // прочитать данные из указанного файла
     fun readData(filename : String) :List<KeyValueElement> {
@@ -60,6 +77,7 @@ class KeyValueDataBase {
         return elements
     }
 
+    // записать данные в указанный файл
     fun writeData(filename: String, data: List<KeyValueElement>) {
         val file = File(filename)
         if (!file.exists())
@@ -70,7 +88,90 @@ class KeyValueDataBase {
         for (it in 1 until data.size)
             file.appendText("${data[it]}\n")
     }
+
+    // добавить элемент
+    fun addElement(element: KeyValueElement, replace: Boolean = false): String {
+        if (map.containsKey(element.key)) { // такой элемент уже существует
+            if (replace) {
+                map[element.key] = element.value // всё равно заменить
+                return "Element was replaced successfully"
+            }
+            return "This key already in the database"
+        } else {
+            map[element.key] = element.value
+            return "Element was added successfully"
+        }
+    }
+
+    // удалить элемент
+    fun deleteElement(key: String): String{
+        if (map.containsKey(key)) {
+            map.remove(key)
+            return "Element was deleted successfully"
+        } else {
+            return "This key already not in database"
+        }
+    }
+
+    // Получить элемент, если он есть
+    // и вернуть null в обратном случае
+    fun getElement(key: String): String? {
+        if (map.containsKey(key)) {
+            return map[key].toString()
+        } else {
+            return null
+        }
+    }
+
 }
 
 fun main() {
+    val database = KeyValueDataBase()
+    while (true) {
+        println("Enter a command (a == add, d == delete, g == get, e == exit application)")
+        val cmd = readLine()
+        if (cmd == null || ((cmd != "a") && (cmd != "d") && (cmd != "g"))) {
+            database.saveData()
+            return
+        }
+        if (cmd == "a") {
+            println("Enter a key and value in format \"key -> value\"")
+            val userInput = readLine()
+            val element = KeyValueElement("","")
+            if (userInput != null && element.assign(userInput)) {
+                var log = database.addElement(element)
+                if (log == "This key already in the database") {
+                    println("This key already in the database. Do you want to replace value for this key? (y == yes, n == no)")
+                    val userAns = readLine()
+                    if (userAns == "y")
+                        log = database.addElement(element, true)
+                }
+                println(log)
+            } else {
+                println("incorrect input.")
+            }
+            continue
+        }
+        if (cmd == "d") {
+            println("Enter a key")
+            val userInput = readLine()
+            if (userInput != null) {
+                val log = database.deleteElement(userInput)
+                println(log)
+            }
+            continue
+        }
+        if (cmd == "g") {
+            println("Enter a key")
+            val userInput = readLine()
+            if (userInput != null) {
+                val log = database.getElement(userInput)
+                if (log != null)
+                    println(log)
+                else
+                    println("This key not in a database.")
+            }
+            continue
+        }
+    }
 }
