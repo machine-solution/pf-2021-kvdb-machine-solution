@@ -1,5 +1,7 @@
 import java.io.File
 
+const val incorrect_input = "incorrect_input.txt"
+
 // Пара ключ-значение
 class KeyValueElement {
     // поля
@@ -32,7 +34,8 @@ class KeyValueElement {
         else {
             key = ""
             value = ""
-            return false // Нужно скидывать нечитаему строку в мусорный файл
+            File(incorrect_input).appendText("$string\n") // Нужно скидывать нечитаемую строку в мусорный файл
+            return false
         }
         key = string.substring(0,separator)
         value = string.substring(separator + 4)
@@ -78,7 +81,7 @@ class KeyValueDataBase {
     }
 
     // записать данные в указанный файл
-    fun writeData(filename: String, data: List<KeyValueElement>) {
+    private fun writeData(filename: String, data: List<KeyValueElement>) {
         val file = File(filename)
         if (!file.exists())
             return
@@ -125,53 +128,20 @@ class KeyValueDataBase {
 
 }
 
+val database = KeyValueDataBase() // глобальная переменная базы данных
+
 fun main() {
-    val database = KeyValueDataBase()
     while (true) {
-        println("Enter a command (a == add, d == delete, g == get, e == exit application)")
-        val cmd = readLine()
-        if (cmd == null || ((cmd != "a") && (cmd != "d") && (cmd != "g"))) {
-            database.saveData()
-            return
-        }
-        if (cmd == "a") {
-            println("Enter a key and value in format \"key -> value\"")
-            val userInput = readLine()
-            val element = KeyValueElement("","")
-            if (userInput != null && element.assign(userInput)) {
-                var log = database.addElement(element)
-                if (log == "This key already in the database") {
-                    println("This key already in the database. Do you want to replace value for this key? (y == yes, n == no)")
-                    val userAns = readLine()
-                    if (userAns == "y")
-                        log = database.addElement(element, true)
-                }
-                println(log)
-            } else {
-                println("incorrect input.")
+        println("Enter a command (a == add, d == delete, g == get, r == replace, e == exit application)")
+        when (userMeanCmd(readLine())) {
+            "a" -> add()
+            "d" -> delete()
+            "g" -> get()
+            "r" -> replace()
+            "e" -> {
+                database.saveData()
+                return
             }
-            continue
-        }
-        if (cmd == "d") {
-            println("Enter a key")
-            val userInput = readLine()
-            if (userInput != null) {
-                val log = database.deleteElement(userInput)
-                println(log)
-            }
-            continue
-        }
-        if (cmd == "g") {
-            println("Enter a key")
-            val userInput = readLine()
-            if (userInput != null) {
-                val log = database.getElement(userInput)
-                if (log != null)
-                    println(log)
-                else
-                    println("This key not in a database.")
-            }
-            continue
         }
     }
 }
