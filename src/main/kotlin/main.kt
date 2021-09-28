@@ -27,7 +27,7 @@ class KeyValueElement {
     fun assign(string: String): Boolean {
         val pattern = " -> ".toRegex()
         val result = pattern.find(string)
-        var separator = 0
+        val separator: Int
         if (result?.range != null)
             separator = result.range.first
         else {
@@ -109,22 +109,51 @@ class KeyValueDataBase {
 
     // удалить элемент
     fun deleteElement(key: String): String{
-        if (map.containsKey(key)) {
+        return if (map.containsKey(key)) {
             map.remove(key)
-            return "Element was deleted successfully"
+            "Element was deleted successfully"
         } else {
-            return "This key already not in database"
+            "This key already not in database"
         }
     }
 
     // Получить элемент, если он есть
     // и вернуть null в обратном случае
     fun getElement(key: String): String? {
-        if (map.containsKey(key)) {
-            return map[key].toString()
+        return if (map.containsKey(key)) {
+            map[key].toString()
         } else {
-            return null
+            null
         }
+    }
+
+    // выполняет addElement для всех запросов в файле
+    fun fileAdd(filename: String?) {
+        var path = filename
+        if (path == null)
+            path = getCorrectPath("resource file")
+        val data = readData(path) // некорректные запросы автоматически попали в incorrect_input.txt
+        for (element in data) {
+            // запросы, пытающиеся сделать замену существующих элементов попадают в unconfirmed_add_query.txt
+            if (addElement(element) == "This key already in the database")
+                File(unconfirmedAddQuery).appendText("$element\n")
+        }
+    }
+
+    // выполняет replaceElement (т.е. addElement(replace = true)) для всех запросов в файле
+    fun fileReplace(filename: String?) {
+        var path = filename
+        if (path == null)
+            path = getCorrectPath("resource file")
+        val data = readData(path) // некорректные запросы автоматически попали в incorrect_input.txt
+        for (element in data) {
+            addElement(element, true)
+        }
+    }
+
+    fun confirmAllAddQueries() {
+        fileReplace(unconfirmedAddQuery)
+        File(unconfirmedAddQuery).writeText("")
     }
 
 }

@@ -64,6 +64,7 @@ fun userMeanCmd(cmd: String?): String {
         cmd[0].toString()
 }
 
+// Интерактивно получает от пользователя корректный путь на файл
 fun getCorrectPath(fileAlias: String): String {
     println("Enter the path of $fileAlias")
     var path = readLine()
@@ -72,22 +73,4 @@ fun getCorrectPath(fileAlias: String): String {
         path = readLine()
     }
     return path.toString()
-}
-
-fun fileAdd() {
-    val path = getCorrectPath("resource file")
-    val data = database.readData(path) // некорректные запросы автоматически попали в incorrect_input.txt
-    for (element in data) {
-        // запросы, пытающиеся сделать замену существующих элементов попадают в unconfirmed_add_query.txt
-        if (database.addElement(element) == "This key already in the database")
-            File(unconfirmedAddQuery).appendText("$element\n")
-    }
-}
-
-fun fileReplace() {
-    val path = getCorrectPath("resource file")
-    val data = database.readData(path) // некорректные запросы автоматически попали в incorrect_input.txt
-    for (element in data) {
-            database.addElement(element, true)
-    }
 }
