@@ -1,6 +1,5 @@
 import java.io.File
 
-const val incorrect_input = "incorrect_input.txt"
 
 // Пара ключ-значение
 class KeyValueElement {
@@ -34,7 +33,7 @@ class KeyValueElement {
         else {
             key = ""
             value = ""
-            File(incorrect_input).appendText("$string\n") // Нужно скидывать нечитаемую строку в мусорный файл
+            File(incorrectInput).appendText("$string\n") // Нужно скидывать нечитаемую строку в мусорный файл
             return false
         }
         key = string.substring(0,separator)
@@ -54,7 +53,6 @@ class KeyValueElement {
 
 class KeyValueDataBase {
     private var map: MutableMap<String,String> = mutableMapOf()
-    private val bootFile = "DataBase.txt"
 
     // При создании загружает данные из bootFile
     constructor() {
@@ -75,8 +73,11 @@ class KeyValueDataBase {
     fun readData(filename : String) :List<KeyValueElement> {
         val data = File(filename).readLines()
         val elements = MutableList(0){KeyValueElement()}
-        for (string in data)
-            elements.add(KeyValueElement(string))
+        for (string in data) {
+            val element = KeyValueElement(string)
+            if (element != KeyValueElement("","")) // проверяем корректность ввода элемента
+                elements.add(element)
+        }
         return elements
     }
 

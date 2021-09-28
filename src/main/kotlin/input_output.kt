@@ -1,3 +1,9 @@
+import java.io.File
+
+// Имена файлов ввода - вывода
+var incorrectInput = "incorrect_input.txt"
+var unconfirmedAddQuery = "unconfirmed_add_query.txt"
+var bootFile = "data_base.txt"
 
 
 fun add() {
@@ -14,7 +20,7 @@ fun add() {
         }
         println(log)
     } else {
-        println("incorrect input.")
+        println("incorrect input")
     }
 }
 
@@ -35,7 +41,7 @@ fun get() {
         if (log != null)
             println(log)
         else
-            println("This key not in a database.")
+            println("This key not in a database")
     }
 }
 
@@ -47,7 +53,7 @@ fun replace() {
         var log = database.addElement(element, true)
         println(log)
     } else {
-        println("incorrect input.")
+        println("incorrect input")
     }
 }
 
@@ -56,4 +62,32 @@ fun userMeanCmd(cmd: String?): String {
         " "
     else
         cmd[0].toString()
+}
+
+fun getCorrectPath(fileAlias: String): String {
+    println("Enter the path of $fileAlias")
+    var path = readLine()
+    while (path == null || !File(path).isFile) {
+        println("Unable to convert file to text. Please, the path of another file")
+        path = readLine()
+    }
+    return path.toString()
+}
+
+fun fileAdd() {
+    val path = getCorrectPath("resource file")
+    val data = database.readData(path) // некорректные запросы автоматически попали в incorrect_input.txt
+    for (element in data) {
+        // запросы, пытающиеся сделать замену существующих элементов попадают в unconfirmed_add_query.txt
+        if (database.addElement(element) == "This key already in the database")
+            File(unconfirmedAddQuery).appendText("$element\n")
+    }
+}
+
+fun fileReplace() {
+    val path = getCorrectPath("resource file")
+    val data = database.readData(path) // некорректные запросы автоматически попали в incorrect_input.txt
+    for (element in data) {
+            database.addElement(element, true)
+    }
 }
