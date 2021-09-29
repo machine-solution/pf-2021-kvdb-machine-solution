@@ -128,32 +128,32 @@ class KeyValueDataBase {
     }
 
     // выполняет addElement для всех запросов в файле
-    fun fileAdd(filename: String?) {
-        var path = filename
-        if (path == null)
-            path = getCorrectPath("resource file")
-        val data = readData(path) // некорректные запросы автоматически попали в incorrect_input.txt
+    fun fileAdd(filename: String? = null): String {
+        if (filename == null)
+            return "Command is canceled"
+        val data = readData(filename) // некорректные запросы автоматически попали в incorrect_input.txt
         for (element in data) {
             // запросы, пытающиеся сделать замену существующих элементов попадают в unconfirmed_add_query.txt
             if (addElement(element) == "This key already in the database")
-                File(unconfirmedAddQuery).appendText("$element\n")
+                File(unconfirmedAddQueries).appendText("$element\n")
         }
+        return "Success" // добавить логи в дальнейшем
     }
 
     // выполняет replaceElement (т.е. addElement(replace = true)) для всех запросов в файле
-    fun fileReplace(filename: String?) {
-        var path = filename
-        if (path == null)
-            path = getCorrectPath("resource file")
-        val data = readData(path) // некорректные запросы автоматически попали в incorrect_input.txt
+    fun fileReplace(filename: String? = null): String {
+        if (filename == null)
+            return "Command is canceled"
+        val data = readData(filename) // некорректные запросы автоматически попали в incorrect_input.txt
         for (element in data) {
             addElement(element, true)
         }
+        return "Success" // добавить логи в дальнейшем
     }
 
     fun confirmAllAddQueries() {
-        fileReplace(unconfirmedAddQuery)
-        File(unconfirmedAddQuery).writeText("")
+        fileReplace(unconfirmedAddQueries)
+        File(unconfirmedAddQueries).writeText("")
     }
 
 }
@@ -162,16 +162,19 @@ val database = KeyValueDataBase() // глобальная переменная �
 
 fun main() {
     while (true) {
-        println("Enter a command (a == add, d == delete, g == get, r == replace, e == exit application)")
+        println("Enter a command or write \"i\" for more information")
         when (userMeanCmd(readLine())) {
             "a" -> add()
             "d" -> delete()
             "g" -> get()
             "r" -> replace()
+            "i" -> printAvailableCommands()
             "e" -> {
                 database.saveData()
                 return
             }
+            "fa" -> addFromFile()
+            "fr" -> replaceFromFile()
         }
     }
 }

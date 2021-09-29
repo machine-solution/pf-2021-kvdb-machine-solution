@@ -4,12 +4,12 @@ import kotlin.test.*
 fun toTestIO(num: Int = 1) {
     bootFile = "testing/data_base_test$num.txt"
     incorrectInput = "testing/incorrect_input_test$num.txt"
-    unconfirmedAddQuery = "testing/unconfirmed_add_query_test$num.txt"
+    unconfirmedAddQueries = "testing/unconfirmed_add_queries_test$num.txt"
 }
 
 fun toRealizeIO() {
     incorrectInput = "incorrect_input.txt"
-    unconfirmedAddQuery = "unconfirmed_add_query.txt"
+    unconfirmedAddQueries = "unconfirmed_add_queries.txt"
     bootFile = "data_base.txt"
 }
 
@@ -56,15 +56,15 @@ internal class Test2 {
     @Test
     fun fileQueriesTest() {
         File(incorrectInput).writeText("")
-        File(unconfirmedAddQuery).writeText("")
+        File(unconfirmedAddQueries).writeText("")
         val kvdb = KeyValueDataBase()
         kvdb.fileAdd("testing/add_queries2.txt")
         val incorrect = File(incorrectInput).readLines()
-        var unconfirmed = File(unconfirmedAddQuery).readLines()
+        var unconfirmed = File(unconfirmedAddQueries).readLines()
         assertEquals(4, incorrect.size)
         assertEquals(4, unconfirmed.size)
         kvdb.confirmAllAddQueries()
-        unconfirmed = File(unconfirmedAddQuery).readLines()
+        unconfirmed = File(unconfirmedAddQueries).readLines()
         assertEquals(0, unconfirmed.size)
         assertEquals("c", kvdb.getElement("a"))
     }
