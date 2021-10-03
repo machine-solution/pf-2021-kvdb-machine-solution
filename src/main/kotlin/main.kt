@@ -191,12 +191,14 @@ suspend fun userInterface() {
 }
 
 fun main()  = runBlocking {
+    createWindow("Hello world!")
+    /*
     launch {
         autoSave()
     }
     launch {
         userInterface()
     }
-    println("Hello, dear user!")
+    */
 }
 
