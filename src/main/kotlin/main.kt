@@ -1,4 +1,6 @@
+import kotlinx.coroutines.*
 import java.io.File
+import kotlin.system.exitProcess
 
 
 // Пара ключ-значение
@@ -160,8 +162,17 @@ class KeyValueDataBase {
 
 val database = KeyValueDataBase() // глобальная переменная базы данных
 
-fun main() {
+
+suspend fun autoSave() {
     while (true) {
+        database.saveData()
+        delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
+    }
+}
+
+suspend fun userInterface() {
+    while (true) {
+        delay(500) // прерываем на полсекунды для входа в сохранение
         println("Enter a command or write \"i\" for more information")
         when (userMeanCmd(readLine())) {
             "a" -> add()
@@ -171,10 +182,21 @@ fun main() {
             "i" -> printAvailableCommands()
             "e" -> {
                 database.saveData()
-                return
+                exitProcess(0)
             }
             "fa" -> addFromFile()
             "fr" -> replaceFromFile()
         }
     }
 }
+
+fun main()  = runBlocking {
+    launch {
+        autoSave()
+    }
+    launch {
+        userInterface()
+    }
+    println("Hello, dear user!")
+}
+

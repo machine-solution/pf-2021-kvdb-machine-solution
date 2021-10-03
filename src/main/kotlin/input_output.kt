@@ -89,11 +89,11 @@ fun userMeanCmd(cmd: String?): String {
         return " "
     else if (cmd[0] == 'f') {
         if (cmd.length <= 1 || ((cmd[1] != 'a') && (cmd[1] != 'd') && (cmd[1] != 'g') && (cmd[1] != 'r')))
-            return cmd.substring(0,2)
-        else
             return " "
+        else
+            return cmd.substring(0,2)
     } else {
-        cmd[0].toString()
+        return cmd[0].toString()
     }
     return " " // если я забыл какой-то случай
 }
@@ -103,9 +103,9 @@ fun getCorrectPath(fileAlias: String): String? {
     println("Enter the path of $fileAlias")
     var path = readLine()
     while (path == null || !File(path).isFile) {
-        if (path == null)
+        if (path == null || path.isEmpty())
             return null
-        println("Unable to convert file to text. Please, the path of another file")
+        println("Unable to convert file to text. Please, enter the path of another file")
         path = readLine()
     }
     return path.toString()
