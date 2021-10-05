@@ -8,17 +8,9 @@ import org.jetbrains.skiko.SkiaLayer
 import org.jetbrains.skiko.SkiaRenderer
 import org.jetbrains.skiko.SkiaWindow
 import java.awt.Dimension
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
-import java.awt.event.MouseMotionAdapter
+import java.awt.event.*
 import javax.swing.WindowConstants
 import kotlin.math.roundToInt
-
-var i = 0
-
-fun main() {
-    createWindow("Sample")
-}
 
 fun createWindow(title: String) = runBlocking(Dispatchers.Swing) {
     val window = SkiaWindow()
@@ -27,6 +19,7 @@ fun createWindow(title: String) = runBlocking(Dispatchers.Swing) {
 
     window.layer.renderer = Renderer(window.layer)
     window.layer.addMouseListener(MyMouseAdapter)
+    window.layer.addKeyListener(MyKeyListener)
 
     window.preferredSize = Dimension(800, 700)
     window.minimumSize = Dimension(100,100)
@@ -43,9 +36,6 @@ class Renderer(val layer: SkiaLayer): SkiaRenderer {
     }
 
     override fun onRender(canvas: Canvas, width: Int, height: Int, nanoTime: Long) {
-        if (i++ / 100 % 2 == 0)
-            canvas.drawCircle(0F,0F,200F, paint)
-        println(i)
 
         layer.needRedraw()
     }
@@ -65,5 +55,19 @@ object MyMouseAdapter : MouseAdapter() {
     override fun mouseClicked(event :MouseEvent) {
         State.mouseX = event.x.toFloat()
         State.mouseY = event.y.toFloat()
+    }
+}
+
+object MyKeyListener : KeyListener {
+    override fun keyTyped(e: KeyEvent?) {
+
+    }
+
+    override fun keyPressed(e: KeyEvent) {
+
+    }
+
+    override fun keyReleased(e: KeyEvent?) {
+
     }
 }

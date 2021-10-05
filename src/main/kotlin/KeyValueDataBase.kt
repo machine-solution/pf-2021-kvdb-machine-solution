@@ -17,13 +17,13 @@ class KeyValueElement {
         this.value = value
     }
     // конструктор, создающий элемент по строке
-    constructor(string: String) {
-        assign(string)
+    constructor(string: String, file: File = File("incorrect_global")) {
+        assign(string, file)
     }
 
 
     // Разбить строку данных на ключ и значение и сохранить
-    fun assign(string: String): Boolean {
+    fun assign(string: String, incorrect: File = File("incorrect_global")): Boolean {
         val pattern = " -> ".toRegex()
         val result = pattern.find(string)
         val separator: Int
@@ -32,7 +32,7 @@ class KeyValueElement {
         else {
             key = ""
             value = ""
-            File(incorrectInput).appendText("$string\n") // Нужно скидывать нечитаемую строку в мусорный файл
+            incorrect.appendText("$string\n") // Нужно скидывать нечитаемую строку в мусорный файл
             return false
         }
         key = string.substring(0,separator)
@@ -50,12 +50,13 @@ class KeyValueElement {
             && this.value == other.value
 }
 
-class KeyValueDataBase {
+class KeyValueDataBase// При создании загружает данные из bootFile
+    (direct : String) {
     private var map: MutableMap<String,String> = mutableMapOf()
+    private var directory: String = direct
 
-    // При создании загружает данные из bootFile
-    constructor() {
-        val elements = readData(bootFile)
+    init {
+        val elements = readData(directory + bootFile)
         for (element in elements)
             addElement(element)
     }
@@ -65,7 +66,7 @@ class KeyValueDataBase {
         val elements = mutableListOf<KeyValueElement>()
         for (element in map)
             elements.add(KeyValueElement(element.key, element.value))
-        writeData(bootFile, elements)
+        writeData(directory + bootFile, elements)
     }
 
     // прочитать данные из указанного файла
@@ -73,7 +74,7 @@ class KeyValueDataBase {
         val data = File(filename).readLines()
         val elements = MutableList(0){KeyValueElement()}
         for (string in data) {
-            val element = KeyValueElement(string)
+            val element = KeyValueElement(string, File(directory + incorrectInput))
             if (element != KeyValueElement("","")) // проверяем корректность ввода элемента
                 elements.add(element)
         }
@@ -134,7 +135,7 @@ class KeyValueDataBase {
         for (element in data) {
             // запросы, пытающиеся сделать замену существующих элементов попадают в unconfirmed_add_query.txt
             if (addElement(element) == "This key already in the database")
-                File(unconfirmedAddQueries).appendText("$element\n")
+                File(directory + unconfirmedAddQueries).appendText("$element\n")
         }
         return "Success" // добавить логи в дальнейшем
     }
@@ -151,8 +152,8 @@ class KeyValueDataBase {
     }
 
     fun confirmAllAddQueries() {
-        fileReplace(unconfirmedAddQueries)
-        File(unconfirmedAddQueries).writeText("")
+        fileReplace(directory + unconfirmedAddQueries)
+        File(directory + unconfirmedAddQueries).writeText("")
     }
 
 }

@@ -1,9 +1,9 @@
 import java.io.File
 
 // Имена файлов ввода - вывода
-var incorrectInput = "incorrect_input.txt"
-var unconfirmedAddQueries = "unconfirmed_add_queries.txt"
-var bootFile = "data_base.txt"
+const val incorrectInput = "/incorrect_input.txt"
+const val unconfirmedAddQueries = "/unconfirmed_add_queries.txt"
+const val bootFile = "/data_base.txt"
 
 
 fun add() {

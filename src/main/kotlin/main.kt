@@ -2,7 +2,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import kotlin.system.exitProcess
 
-val database = KeyValueDataBase() // глобальная переменная базы данных
+val database = KeyValueDataBase("default_base") // глобальная переменная базы данных
 
 suspend fun autoSave() {
     while (true) {
@@ -31,15 +31,15 @@ suspend fun userInterface() {
     }
 }
 
-fun main()  = runBlocking {
-    createWindow("Hello world!")
-    /*
+fun main(): Unit = runBlocking {
+    println("Hello, dear user!")
+//    createWindow("Hello world!")
     launch {
         autoSave()
     }
+
     launch {
         userInterface()
     }
-    */
 }
 
