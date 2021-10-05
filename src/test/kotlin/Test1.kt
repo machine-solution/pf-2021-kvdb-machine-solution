@@ -38,7 +38,6 @@ internal class Test1 {
         assertEquals("1 -> 1", kvdb.getElement("1"))
         kvdb.addElement(KeyValueElement("1", "1"), true)
         assertEquals("1", kvdb.getElement("1"))
-        kvdb.saveData()
     }
 }
 
