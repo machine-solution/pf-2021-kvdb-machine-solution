@@ -12,6 +12,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import java.io.File
+import kotlin.system.exitProcess
 
 enum class Arg {
     NULL,
@@ -52,8 +53,43 @@ fun isCorrectPath(path: String): Boolean {
     return File(path).isFile
 }
 
-fun doCommand(command: Command) {
+fun add(key: String, value: String): String {
+    val element = KeyValueElement(key, value)
+    return database.addElement(element)
+}
 
+fun delete(key: String): String {
+    return database.deleteElement(key)
+}
+
+fun get(key: String): String {
+    return database.getElement(key) ?: "This key not in a database"
+}
+
+fun replace(key: String, value: String): String {
+    val element = KeyValueElement(key, value)
+    return database.addElement(element, true)
+}
+
+fun addFromFile(path: String, delimiter: String): String {
+    return database.fileAdd(path)
+}
+
+fun replaceFromFile(path: String, delimiter: String): String {
+    return database.fileReplace(path)
+}
+
+fun deleteFromFile(path: String, delimiter: String): String {
+    return "Not yet implemented"
+}
+
+fun changeDatabase(newBasename: String): String {
+    return "Not yet implemented"
+}
+
+fun exit() {
+    database.saveData()
+    exitProcess(0)
 }
 
 fun main() = application {
@@ -71,6 +107,8 @@ fun main() = application {
         val args = mutableStateOf(Arg.NULL)
         val cmd = mutableStateOf(Command.NULL)
         val correctInput = mutableStateOf(true)
+
+        val log = mutableStateOf("")
         MaterialTheme {
             // список кнопок на экране
             Column(
@@ -108,8 +146,11 @@ fun main() = application {
                     args.value = Arg.BASENAME
                     cmd.value = Command.CHANGE_DATABASE
                 }
+                simpleButton(false, "Exit") {
+                    exit()
+                }
             }
-            // список аргументов команды
+            // список аргументов команды или ответ на запрос к базе данных
             when (args.value) {
                 Arg.KEY_VALUE -> {
                     Column(
@@ -187,7 +228,19 @@ fun main() = application {
                     }
                     correctInput.value = isCorrectString(newBasename.value)
                 }
-                else -> {}
+                else ->
+                    Column(
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(log.value,
+                            modifier = Modifier.fillMaxWidth(1f),
+                            fontSize = 22.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color(red = 0x00, green = 0x00, blue = 0x00, alpha = 0xFF)
+                        )
+                    }
             }
             // большая зелёная кнопка выполнения команды
             if (correctInput.value && args.value != Arg.NULL)
@@ -200,7 +253,17 @@ fun main() = application {
                     Button(
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green, contentColor = Color.Black),
                         onClick = {
-                            doCommand(cmd.value)
+                            log.value = when (cmd.value) {
+                                Command.ADD -> add(key.value, value.value)
+                                Command.GET -> get(key.value)
+                                Command.DELETE -> delete(key.value)
+                                Command.REPLACE -> replace(key.value, value.value)
+                                Command.FILE_ADD -> addFromFile(file.value, delimiter.value)
+                                Command.FILE_REPLACE -> replaceFromFile(file.value, delimiter.value)
+                                Command.FILE_DELETE -> deleteFromFile(file.value, delimiter.value)
+                                Command.CHANGE_DATABASE -> changeDatabase(newBasename.value)
+                                Command.NULL -> ""
+                            }
                             key.value = ""
                             value.value = ""
                             file.value = ""
