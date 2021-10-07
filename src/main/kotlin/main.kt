@@ -1,8 +1,10 @@
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
 import java.io.File
 import kotlin.system.exitProcess
 
-val database = KeyValueDataBase("default_base") // глобальная переменная базы данных
+var database = KeyValueDataBase("default_base") // глобальная переменная базы данных
+var basename = "default"
 
 suspend fun autoSave() {
     while (true) {
@@ -31,15 +33,15 @@ suspend fun userInterface() {
     }
 }
 
-//fun main(): Unit = runBlocking {
-//    println("Hello, dear user!")
-////    createWindow("Hello world!")
-//    launch {
-//        autoSave()
-//    }
-//
-//    launch {
-//        userInterface()
-//    }
-//}
+fun main(): Unit = runBlocking {
+    println("Hello, dear user!")
+//    createWindow("Hello world!")
+    launch {
+        autoSave()
+    }
+
+    launch {
+        userInterface()
+    }
+}
 
