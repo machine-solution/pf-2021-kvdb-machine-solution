@@ -31,15 +31,15 @@ suspend fun userInterface() {
     }
 }
 
-fun main(): Unit = runBlocking {
-    println("Hello, dear user!")
-//    createWindow("Hello world!")
-    launch {
-        autoSave()
-    }
-
-    launch {
-        userInterface()
-    }
-}
+//fun main(): Unit = runBlocking {
+//    println("Hello, dear user!")
+////    createWindow("Hello world!")
+//    launch {
+//        autoSave()
+//    }
+//
+//    launch {
+//        userInterface()
+//    }
+//}
 

@@ -1,73 +1,40 @@
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.swing.Swing
-import org.jetbrains.skija.Canvas
-import org.jetbrains.skija.Paint
-import org.jetbrains.skija.PaintMode
-import org.jetbrains.skiko.SkiaLayer
-import org.jetbrains.skiko.SkiaRenderer
-import org.jetbrains.skiko.SkiaWindow
-import java.awt.Dimension
-import java.awt.event.*
-import javax.swing.WindowConstants
-import kotlin.math.roundToInt
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 
-fun createWindow(title: String) = runBlocking(Dispatchers.Swing) {
-    val window = SkiaWindow()
-    window.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
-    window.title = title
-
-    window.layer.renderer = Renderer(window.layer)
-    window.layer.addMouseListener(MyMouseAdapter)
-    window.layer.addKeyListener(MyKeyListener)
-
-    window.preferredSize = Dimension(800, 700)
-    window.minimumSize = Dimension(100,100)
-    window.pack()
-    window.layer.awaitRedraw()
-    window.isVisible = true
-}
-
-class Renderer(val layer: SkiaLayer): SkiaRenderer {
-    private val paint = Paint().apply {
-        color = 0xff000000L.toInt()
-        mode = PaintMode.FILL
-        strokeWidth = 5f
-    }
-
-    override fun onRender(canvas: Canvas, width: Int, height: Int, nanoTime: Long) {
-
-        layer.needRedraw()
-    }
-}
-
-object State {
-    var mouseX = 0f
-    var mouseY = 0f
-}
-
-object MyMouseAdapter : MouseAdapter() {
-    override fun mouseMoved(event: MouseEvent) {
-        State.mouseX = event.x.toFloat()
-        State.mouseY = event.y.toFloat()
-    }
-
-    override fun mouseClicked(event :MouseEvent) {
-        State.mouseX = event.x.toFloat()
-        State.mouseY = event.y.toFloat()
-    }
-}
-
-object MyKeyListener : KeyListener {
-    override fun keyTyped(e: KeyEvent?) {
-
-    }
-
-    override fun keyPressed(e: KeyEvent) {
-
-    }
-
-    override fun keyReleased(e: KeyEvent?) {
-
+fun main() = application {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Compose for Desktop",
+        state = rememberWindowState(width = 300.dp, height = 300.dp)
+    ) {
+        val count = remember { mutableStateOf(0) }
+        MaterialTheme {
+            Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
+                Button(modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {
+                        count.value++
+                    }) {
+                    Text(if (count.value == 0) "Hello World" else "Clicked ${count.value}!")
+                }
+                Button(modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {
+                        count.value = 0
+                    }) {
+                    Text("Reset")
+                }
+            }
+        }
     }
 }
