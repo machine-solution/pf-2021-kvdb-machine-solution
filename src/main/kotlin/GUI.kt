@@ -83,16 +83,28 @@ fun deleteFromFile(path: String): String {
     return database.fileDelete(path)
 }
 
-fun changeDatabase(newBasename: String): String {
-    return "Not yet implemented"
+fun changeDatabase(name: String): String {
+    database.saveData()
+    return if (name in databaseNames) {
+        if (!databaseIsLoad[name]!!) {
+            databaseMap[name] = KeyValueDataBase(name)
+            databaseIsLoad[name] = true
+        }
+        database = databaseMap[name]!!
+        basename = name
+        "The database was changed successfully"
+    }
+    else "This database not exists"
 }
 
 fun exit() {
     database.saveData()
+    saveDatabases()
     exitProcess(0)
 }
 
 fun main() = application {
+    loadDatabases()
     Window(
         onCloseRequest = ::exitApplication,
         title = "Key-Value database",

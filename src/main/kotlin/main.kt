@@ -3,8 +3,48 @@ import kotlinx.coroutines.*
 import java.io.File
 import kotlin.system.exitProcess
 
+val databaseMap = mutableMapOf<String, KeyValueDataBase>()
+val databaseNames = mutableSetOf<String>()
+val databaseIsLoad = mutableMapOf<String, Boolean>()
+var databaseId = ""
+
 var database = KeyValueDataBase("default_base") // глобальная переменная базы данных
 var basename = "default"
+
+fun loadDatabases() {
+    val names = File("basenames.txt").readLines()
+    for (name in names) {
+        databaseNames.add(name)
+        databaseIsLoad[name] = false
+    }
+    databaseMap[names[0]] = KeyValueDataBase(names[0] + "_base")
+    databaseIsLoad[names[0]] = true
+    databaseId = names[0]
+
+    database = databaseMap[names[0]]!!
+    basename = names[0]
+}
+
+fun saveDatabases() {
+    val file = File("basenames.txt")
+    file.writeText("")
+    for (name in databaseNames) {
+        file.appendText(name + "\n")
+    }
+}
+
+//fun changeDatabase(name: String): String {
+//    if (name in databaseNames) {
+//        if (!databaseIsLoad[name]!!) {
+//            databaseMap[name] = KeyValueDataBase(name)
+//            databaseIsLoad[name] = true
+//        }
+//        database = databaseMap[name]!!
+//        basename = name
+//        return "The database was changed successfully"
+//    }
+//    else return "This database not exists"
+//}
 
 suspend fun autoSave() {
     while (true) {
@@ -12,6 +52,8 @@ suspend fun autoSave() {
         delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
     }
 }
+
+
 
 //suspend fun userInterface() {
 //    while (true) {
