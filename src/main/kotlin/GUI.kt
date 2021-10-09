@@ -72,14 +72,14 @@ fun replace(key: String, value: String): String {
 }
 
 fun addFromFile(path: String, delimiter: String): String {
-    return database.fileAdd(path)
+    return database.fileAdd(path, delimiter)
 }
 
 fun replaceFromFile(path: String, delimiter: String): String {
-    return database.fileReplace(path)
+    return database.fileReplace(path, delimiter)
 }
 
-fun deleteFromFile(path: String, delimiter: String): String {
+fun deleteFromFile(path: String): String {
     return database.fileDelete(path)
 }
 
@@ -260,7 +260,7 @@ fun main() = application {
                                 Command.REPLACE -> replace(key.value, value.value)
                                 Command.FILE_ADD -> addFromFile(file.value, delimiter.value)
                                 Command.FILE_REPLACE -> replaceFromFile(file.value, delimiter.value)
-                                Command.FILE_DELETE -> deleteFromFile(file.value, delimiter.value)
+                                Command.FILE_DELETE -> deleteFromFile(file.value)
                                 Command.CHANGE_DATABASE -> changeDatabase(newBasename.value)
                                 Command.NULL -> ""
                             }
