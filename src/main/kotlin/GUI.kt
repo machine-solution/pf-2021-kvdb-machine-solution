@@ -33,6 +33,7 @@ enum class Command {
     FILE_DELETE,
     CHANGE_DATABASE,
     CREATE_DATABASE,
+    DELETE_DATABASE,
 }
 
 @Composable
@@ -95,7 +96,7 @@ fun changeDatabase(name: String): String {
         basename = name
         "The database was changed successfully"
     }
-    else "This database not exists"
+    else "This database doesn't exist"
 }
 
 fun createDatabase(name: String): String {
@@ -114,6 +115,24 @@ fun createDatabase(name: String): String {
         basename = name
         "The database was created successfully"
     }
+}
+
+fun deleteDatabase(name: String): String {
+    return if (name in databaseNames && name != basename) {
+//        File(name + "_base/data_base.txt").delete()
+//        File(name + "_base/incorrect_input.txt").delete()
+//        File(name + "_base/unconfirmed_add_queries.txt").delete()
+        File(name + "_base/").deleteRecursively()
+        databaseMap.remove(name)
+        databaseIsLoad.remove(name)
+        databaseNames.remove(name)
+
+
+        "The database was deleted successfully"
+    }
+    else return if (name == basename) "This database is open now"
+    else "This database doesn't exist"
+
 }
 
 fun exit() {
@@ -180,6 +199,10 @@ fun main() = application {
                 simpleButton(cmd.value ==  Command.CREATE_DATABASE, "Create Database") {
                     args.value = Arg.BASENAME
                     cmd.value = Command.CREATE_DATABASE
+                }
+                simpleButton(cmd.value ==  Command.DELETE_DATABASE, "Delete Database") {
+                    args.value = Arg.BASENAME
+                    cmd.value = Command.DELETE_DATABASE
                 }
                 simpleButton(false, "Exit") {
                     exit()
@@ -298,6 +321,7 @@ fun main() = application {
                                 Command.FILE_DELETE -> deleteFromFile(file.value)
                                 Command.CHANGE_DATABASE -> changeDatabase(newBasename.value)
                                 Command.CREATE_DATABASE -> createDatabase(newBasename.value)
+                                Command.DELETE_DATABASE -> deleteDatabase(newBasename.value)
                                 Command.NULL -> ""
                             }
                             key.value = ""
