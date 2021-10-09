@@ -55,7 +55,7 @@ class KeyValueElement {
 class KeyValueDataBase// При создании загружает данные из bootFile
     (direct : String) {
     private var map: MutableMap<String,String> = mutableMapOf()
-    private var directory: String = direct
+    private var directory: String = direct + "_base"
 
     init {
         val elements = readData(directory + bootFile)

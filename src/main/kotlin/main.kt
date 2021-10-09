@@ -8,7 +8,7 @@ val databaseNames = mutableSetOf<String>()
 val databaseIsLoad = mutableMapOf<String, Boolean>()
 var databaseId = ""
 
-var database = KeyValueDataBase("default_base") // глобальная переменная базы данных
+var database = KeyValueDataBase("default") // глобальная переменная базы данных
 var basename = "default"
 
 fun loadDatabases() {
@@ -17,7 +17,7 @@ fun loadDatabases() {
         databaseNames.add(name)
         databaseIsLoad[name] = false
     }
-    databaseMap[names[0]] = KeyValueDataBase(names[0] + "_base")
+    databaseMap[names[0]] = KeyValueDataBase(names[0])
     databaseIsLoad[names[0]] = true
     databaseId = names[0]
 

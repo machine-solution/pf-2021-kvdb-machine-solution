@@ -32,6 +32,7 @@ enum class Command {
     FILE_REPLACE,
     FILE_DELETE,
     CHANGE_DATABASE,
+    CREATE_DATABASE,
 }
 
 @Composable
@@ -97,6 +98,24 @@ fun changeDatabase(name: String): String {
     else "This database not exists"
 }
 
+fun createDatabase(name: String): String {
+    return if (name in databaseNames)
+        "This database already exists"
+    else {
+        File(name + "_base/").mkdir()
+        File(name + "_base/data_base.txt").createNewFile()
+        File(name + "_base/incorrect_input.txt").createNewFile()
+        File(name + "_base/unconfirmed_add_queries.txt").createNewFile()
+        databaseMap[name] = KeyValueDataBase(name)
+        databaseIsLoad[name] = true
+        databaseNames.add(name)
+
+        database = databaseMap[name]!!
+        basename = name
+        "The database was created successfully"
+    }
+}
+
 fun exit() {
     database.saveData()
     saveDatabases()
@@ -157,6 +176,10 @@ fun main() = application {
                 simpleButton(cmd.value ==  Command.CHANGE_DATABASE, "Change Database") {
                     args.value = Arg.BASENAME
                     cmd.value = Command.CHANGE_DATABASE
+                }
+                simpleButton(cmd.value ==  Command.CREATE_DATABASE, "Create Database") {
+                    args.value = Arg.BASENAME
+                    cmd.value = Command.CREATE_DATABASE
                 }
                 simpleButton(false, "Exit") {
                     exit()
@@ -274,6 +297,7 @@ fun main() = application {
                                 Command.FILE_REPLACE -> replaceFromFile(file.value, delimiter.value)
                                 Command.FILE_DELETE -> deleteFromFile(file.value)
                                 Command.CHANGE_DATABASE -> changeDatabase(newBasename.value)
+                                Command.CREATE_DATABASE -> createDatabase(newBasename.value)
                                 Command.NULL -> ""
                             }
                             key.value = ""
