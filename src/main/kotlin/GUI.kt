@@ -80,7 +80,7 @@ fun replaceFromFile(path: String, delimiter: String): String {
 }
 
 fun deleteFromFile(path: String, delimiter: String): String {
-    return "Not yet implemented"
+    return database.fileDelete(path)
 }
 
 fun changeDatabase(newBasename: String): String {

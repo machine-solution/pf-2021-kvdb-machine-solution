@@ -17,14 +17,16 @@ class KeyValueElement {
         this.value = value
     }
     // конструктор, создающий элемент по строке
-    constructor(string: String, file: File = File("incorrect_global")) {
-        assign(string, file)
+    constructor(string: String, file: File = File("incorrect_global"), delimiter: String = " -> ") {
+        assign(string, delimiter, file)
     }
 
 
     // Разбить строку данных на ключ и значение и сохранить
-    fun assign(string: String, incorrect: File = File("incorrect_global")): Boolean {
-        val pattern = " -> ".toRegex()
+    // delimiter - разделитель между ключём и значением может быть пользовательский
+    // incorrect - файл, в который сохраняются некорректные запросы
+    private fun assign(string: String, delimiter: String = " -> ", incorrect: File = File("incorrect_global")): Boolean {
+        val pattern = delimiter.toRegex()
         val result = pattern.find(string)
         val separator: Int
         if (result?.range != null)
@@ -70,13 +72,24 @@ class KeyValueDataBase// При создании загружает данные
     }
 
     // прочитать данные из указанного файла
-    fun readData(filename : String) :List<KeyValueElement> {
+    // с пользовательским разделителем
+    fun readData(filename : String, delimiter: String = " -> ") :List<KeyValueElement> {
         val data = File(filename).readLines()
         val elements = MutableList(0){KeyValueElement()}
         for (string in data) {
-            val element = KeyValueElement(string, File(directory + incorrectInput))
+            val element = KeyValueElement(string, File(directory + incorrectInput), delimiter)
             if (element != KeyValueElement("","")) // проверяем корректность ввода элемента
                 elements.add(element)
+        }
+        return elements
+    }
+
+    // прочитать только ключи из указанного файла
+    private fun readDataKeys(filename : String) :List<String> {
+        val data = File(filename).readLines()
+        val elements = MutableList(0){""}
+        for (string in data) {
+            elements.add(string)
         }
         return elements
     }
@@ -128,10 +141,8 @@ class KeyValueDataBase// При создании загружает данные
     }
 
     // выполняет addElement для всех запросов в файле
-    fun fileAdd(filename: String? = null): String {
-        if (filename == null)
-            return "Command is canceled"
-        val data = readData(filename) // некорректные запросы автоматически попали в incorrect_input.txt
+    fun fileAdd(filename: String, delimiter: String = " -> "): String {
+        val data = readData(filename, delimiter) // некорректные запросы автоматически попали в incorrect_input.txt
         for (element in data) {
             // запросы, пытающиеся сделать замену существующих элементов попадают в unconfirmed_add_query.txt
             if (addElement(element) == "This key already in the database")
@@ -141,12 +152,19 @@ class KeyValueDataBase// При создании загружает данные
     }
 
     // выполняет replaceElement (т.е. addElement(replace = true)) для всех запросов в файле
-    fun fileReplace(filename: String? = null): String {
-        if (filename == null)
-            return "Command is canceled"
-        val data = readData(filename) // некорректные запросы автоматически попали в incorrect_input.txt
+    fun fileReplace(filename: String, delimiter: String = " -> "): String {
+        val data = readData(filename, delimiter) // некорректные запросы автоматически попали в incorrect_input.txt
         for (element in data) {
             addElement(element, true)
+        }
+        return "Success" // добавить логи в дальнейшем
+    }
+
+    // выполняет deleteElement для всех запросов в файле
+    fun fileDelete(filename: String): String {
+        val data = readDataKeys(filename) // некорректные запросы автоматически попали в incorrect_input.txt
+        for (element in data) {
+            deleteElement(element)
         }
         return "Success" // добавить логи в дальнейшем
     }
