@@ -38,7 +38,7 @@ class KeyValueElement {
             return false
         }
         key = string.substring(0,separator)
-        value = string.substring(separator + 4)
+        value = string.substring(separator + delimiter.length)
         return true
     }
 

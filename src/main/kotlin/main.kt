@@ -56,13 +56,6 @@ suspend fun autoSave() {
     }
 }
 
-suspend fun save() {
-    database?.saveData()
-    delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
-    saveDatabases()
-    delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
-}
-
 //suspend fun userInterface() {
 //    while (true) {
 //        delay(500) // прерываем на полсекунды для входа в сохранение
@@ -83,12 +76,12 @@ suspend fun save() {
 //    }
 //}
 
-suspend fun ui(): Unit = runBlocking {
-    while (true) {
-        delay(500)
-        gui()
-    }
-}
+//suspend fun ui(): Unit = runBlocking {
+//    while (true) {
+//        delay(500)
+//        gui()
+//    }
+//}
 
 fun main(): Unit = runBlocking {
 
