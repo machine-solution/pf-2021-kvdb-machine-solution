@@ -1,6 +1,7 @@
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
 import java.io.File
+import kotlin.concurrent.thread
 import kotlin.system.exitProcess
 
 val databaseMap = mutableMapOf<String, KeyValueDataBase>()
@@ -8,8 +9,8 @@ val databaseNames = mutableSetOf<String>()
 val databaseIsLoad = mutableMapOf<String, Boolean>()
 var databaseId = ""
 
-var database = KeyValueDataBase("default") // глобальная переменная базы данных
-var basename = "default"
+var database : KeyValueDataBase? = null // глобальная переменная базы данных
+var basename = "null"
 
 fun loadDatabases() {
     val names = File("basenames.txt").readLines()
@@ -48,12 +49,19 @@ fun saveDatabases() {
 
 suspend fun autoSave() {
     while (true) {
-        database.saveData()
+        database?.saveData()
+        delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
+        saveDatabases()
         delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
     }
 }
 
-
+suspend fun save() {
+    database?.saveData()
+    delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
+    saveDatabases()
+    delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
+}
 
 //suspend fun userInterface() {
 //    while (true) {
@@ -75,15 +83,20 @@ suspend fun autoSave() {
 //    }
 //}
 
+suspend fun ui(): Unit = runBlocking {
+    while (true) {
+        delay(500)
+        gui()
+    }
+}
+
 fun main(): Unit = runBlocking {
-    println("Hello, dear user!")
-//    createWindow("Hello world!")
+
+    gui()
+
+    // Пока не работает, так как функция gui не прерывается
     launch {
         autoSave()
     }
-
-//    launch {
-//        userInterface()
-//    }
 }
 

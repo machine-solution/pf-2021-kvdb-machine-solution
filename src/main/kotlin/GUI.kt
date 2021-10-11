@@ -1,16 +1,26 @@
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -57,36 +67,39 @@ fun isCorrectPath(path: String): Boolean {
 
 fun add(key: String, value: String): String {
     val element = KeyValueElement(key, value)
-    return database.addElement(element)
+    return database?.addElement(element) ?: "database isn't chosen"
 }
 
 fun delete(key: String): String {
-    return database.deleteElement(key)
+    return database?.deleteElement(key) ?: "database isn't chosen"
 }
 
 fun get(key: String): String {
-    return database.getElement(key) ?: "This key not in a database"
+    return if (database == null)
+        "database isn't chosen"
+    else
+        database?.getElement(key) ?: "This key not in a database"
 }
 
 fun replace(key: String, value: String): String {
     val element = KeyValueElement(key, value)
-    return database.addElement(element, true)
+    return database?.addElement(element, true) ?: "database isn't chosen"
 }
 
 fun addFromFile(path: String, delimiter: String): String {
-    return database.fileAdd(path, delimiter)
+    return database?.fileAdd(path, delimiter) ?: "database isn't chosen"
 }
 
 fun replaceFromFile(path: String, delimiter: String): String {
-    return database.fileReplace(path, delimiter)
+    return database?.fileReplace(path, delimiter) ?: "database isn't chosen"
 }
 
 fun deleteFromFile(path: String): String {
-    return database.fileDelete(path)
+    return database?.fileDelete(path) ?: "database isn't chosen"
 }
 
 fun changeDatabase(name: String): String {
-    database.saveData()
+    database?.saveData()
     return if (name in databaseNames) {
         if (!databaseIsLoad[name]!!) {
             databaseMap[name] = KeyValueDataBase(name)
@@ -136,12 +149,12 @@ fun deleteDatabase(name: String): String {
 }
 
 fun exit() {
-    database.saveData()
+    database?.saveData()
     saveDatabases()
     exitProcess(0)
 }
 
-fun main() = application {
+suspend fun gui() = application {
     loadDatabases()
     Window(
         onCloseRequest = ::exitApplication,
@@ -159,12 +172,23 @@ fun main() = application {
         val correctInput = mutableStateOf(true)
 
         val log = mutableStateOf("")
+/* нереализованная фича выпадающего списка
+        val expanded = mutableStateOf(false)
+        val selectedText = mutableStateOf("")
+
+        val textFieldSize = mutableStateOf(Size.Zero)
+
+        val icon = if (expanded.value)
+            Icons.Filled.ArrowDropDown
+        else
+            Icons.Filled.ArrowDropDown
+ */
         MaterialTheme {
             // список кнопок на экране
             Column(
                 Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)
             ) {
-                simpleButton(cmd.value ==  Command.ADD, "Add") {
+                simpleButton(cmd.value == Command.ADD, "Add") {
                     args.value = Arg.KEY_VALUE
                     cmd.value = Command.ADD
                 }
@@ -172,7 +196,7 @@ fun main() = application {
                     args.value = Arg.KEY
                     cmd.value = Command.GET
                 }
-                simpleButton(cmd.value ==  Command.DELETE, "Delete") {
+                simpleButton(cmd.value == Command.DELETE, "Delete") {
                     args.value = Arg.KEY
                     cmd.value = Command.DELETE
                 }
@@ -180,27 +204,27 @@ fun main() = application {
                     args.value = Arg.KEY_VALUE
                     cmd.value = Command.REPLACE
                 }
-                simpleButton(cmd.value ==  Command.FILE_ADD, "File Add") {
+                simpleButton(cmd.value == Command.FILE_ADD, "File Add") {
                     args.value = Arg.FILE_DELIMITER
                     cmd.value = Command.FILE_ADD
                 }
-                simpleButton(cmd.value ==  Command.FILE_DELETE, "File Delete") {
+                simpleButton(cmd.value == Command.FILE_DELETE, "File Delete") {
                     args.value = Arg.FILE_DELIMITER
                     cmd.value = Command.FILE_DELETE
                 }
-                simpleButton(cmd.value ==  Command.FILE_REPLACE, "File Replace") {
+                simpleButton(cmd.value == Command.FILE_REPLACE, "File Replace") {
                     args.value = Arg.FILE_DELIMITER
                     cmd.value = Command.FILE_REPLACE
                 }
-                simpleButton(cmd.value ==  Command.CHANGE_DATABASE, "Change Database") {
+                simpleButton(cmd.value == Command.CHANGE_DATABASE, "Change Database") {
                     args.value = Arg.BASENAME
                     cmd.value = Command.CHANGE_DATABASE
                 }
-                simpleButton(cmd.value ==  Command.CREATE_DATABASE, "Create Database") {
+                simpleButton(cmd.value == Command.CREATE_DATABASE, "Create Database") {
                     args.value = Arg.BASENAME
                     cmd.value = Command.CREATE_DATABASE
                 }
-                simpleButton(cmd.value ==  Command.DELETE_DATABASE, "Delete Database") {
+                simpleButton(cmd.value == Command.DELETE_DATABASE, "Delete Database") {
                     args.value = Arg.BASENAME
                     cmd.value = Command.DELETE_DATABASE
                 }
@@ -285,6 +309,37 @@ fun main() = application {
                         )
                     }
                     correctInput.value = isCorrectString(newBasename.value)
+/* Нереализованная фича выпадающего списка
+                        TextField(
+                            value = selectedText.value,
+                            onValueChange = {selectedText.value = it },
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .onGloballyPositioned { coordinates ->
+                                    //This value is used to assign to the DropDown the same width
+                                    textFieldSize.value = coordinates.size.toSize()
+                                },
+                            label = {Text("Enter a basename")},
+                            trailingIcon = {
+                                Icon(icon,"contentDescription",
+                                    Modifier.clickable { expanded.value = !expanded.value })
+                            }
+                        )
+                        DropdownMenu(
+                            expanded = expanded.value,
+                            onDismissRequest = { expanded.value = false },
+                            modifier = Modifier
+                                .width(with(LocalDensity.current){textFieldSize.value.width.toDp()})
+                        ) {
+                            databaseNames.forEach { label ->
+                                DropdownMenuItem(onClick = {
+                                    selectedText.value = label
+                                }) {
+                                    Text(text = label)
+                                }
+                            }
+                        }
+ */
                 }
                 else ->
                     Column(
@@ -292,7 +347,8 @@ fun main() = application {
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(log.value,
+                        Text(
+                            log.value,
                             modifier = Modifier.fillMaxWidth(1f),
                             fontSize = 22.sp,
                             textAlign = TextAlign.Center,
@@ -309,7 +365,10 @@ fun main() = application {
 
                 ) {
                     Button(
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green, contentColor = Color.Black),
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = Color.Green,
+                            contentColor = Color.Black
+                        ),
                         onClick = {
                             log.value = when (cmd.value) {
                                 Command.ADD -> add(key.value, value.value)
@@ -332,20 +391,21 @@ fun main() = application {
                             args.value = Arg.NULL
                             cmd.value = Command.NULL
                             correctInput.value = true
-
                         }
                     ) {
                         Text("DO!")
                     }
                 }
             // показывает имя текущей базы данных
-            Text(text = "< $basename >",
+            Text(
+                text = "< $basename >",
                 modifier = Modifier.fillMaxWidth(1f),
-                fontSize=22.sp,
+                fontSize = 22.sp,
                 textAlign = TextAlign.Right,
-                color= Color(red = 0x00, green = 0xF0, blue = 0x90, alpha = 0xFF)
+                color = Color(red = 0x00, green = 0xF0, blue = 0x90, alpha = 0xFF)
             )
         }
     }
 }
+
 
