@@ -33,6 +33,7 @@ enum class Command {
     CHANGE_DATABASE,
     CREATE_DATABASE,
     DELETE_DATABASE,
+    CONFIRM,
 }
 
 @Composable
@@ -250,6 +251,32 @@ fun gui() = application {
                             textAlign = TextAlign.Center,
                             color = Color(red = 0x00, green = 0x00, blue = 0x00, alpha = 0xFF)
                         )
+                        if (cmd.value == Command.CONFIRM) {
+                            Button(
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = Color.Green,
+                                    contentColor = Color.Black
+                                ),
+                                onClick = {
+                                    log.value = confirmAddQueries(true)
+                                    cmd.value = Command.NULL
+                                }
+                            ) {
+                                Text("YES")
+                            }
+                            Button(
+                                colors = ButtonDefaults.buttonColors(
+                                    backgroundColor = Color.Red,
+                                    contentColor = Color.Black
+                                ),
+                                onClick = {
+                                    log.value = confirmAddQueries(false)
+                                    cmd.value = Command.NULL
+                                }
+                            ) {
+                                Text("NO")
+                            }
+                        }
                     }
             }
             // большая зелёная кнопка выполнения команды
@@ -277,6 +304,7 @@ fun gui() = application {
                                 Command.CHANGE_DATABASE -> changeDatabase(newBasename.value)
                                 Command.CREATE_DATABASE -> createDatabase(newBasename.value)
                                 Command.DELETE_DATABASE -> deleteDatabase(newBasename.value)
+                                Command.CONFIRM -> "nothing" // nothing
                                 Command.NULL -> ""
                             }
                             key.value = ""
@@ -285,8 +313,13 @@ fun gui() = application {
                             delimiter.value = " -> "
                             newBasename.value = ""
                             args.value = Arg.NULL
-                            cmd.value = Command.NULL
+                            if (log.value.substring(0,13) == "Query contain" ||
+                                    log.value == "This key is already in the database.\nReplace it?")
+                                cmd.value = Command.CONFIRM
+                            else
+                                cmd.value = Command.NULL
                             correctInput.value = true
+                            confirmAddQueries(false)
                         }
                     ) {
                         Text("DO!")
