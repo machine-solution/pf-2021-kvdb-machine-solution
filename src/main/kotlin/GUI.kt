@@ -1,27 +1,16 @@
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.io.File
 import kotlin.system.exitProcess
 
 enum class Arg {
@@ -55,106 +44,13 @@ fun simpleButton(colorful: Boolean, name: String, onClick : () -> Unit) {
     Button(colors = color, onClick = onClick) {Text(name)}
 }
 
-// проверка корректности key, value, basename, delimiter
-fun isCorrectString(string: String): Boolean {
-    return string.isNotEmpty()
-}
-
-// проверка корректности path
-fun isCorrectPath(path: String): Boolean {
-    return File(path).isFile
-}
-
-fun add(key: String, value: String): String {
-    val element = KeyValueElement(key, value)
-    return database?.addElement(element) ?: "database isn't chosen"
-}
-
-fun delete(key: String): String {
-    return database?.deleteElement(key) ?: "database isn't chosen"
-}
-
-fun get(key: String): String {
-    return if (database == null)
-        "database isn't chosen"
-    else
-        database?.getElement(key) ?: "This key not in a database"
-}
-
-fun replace(key: String, value: String): String {
-    val element = KeyValueElement(key, value)
-    return database?.addElement(element, true) ?: "database isn't chosen"
-}
-
-fun addFromFile(path: String, delimiter: String): String {
-    return database?.fileAdd(path, delimiter) ?: "database isn't chosen"
-}
-
-fun replaceFromFile(path: String, delimiter: String): String {
-    return database?.fileReplace(path, delimiter) ?: "database isn't chosen"
-}
-
-fun deleteFromFile(path: String): String {
-    return database?.fileDelete(path) ?: "database isn't chosen"
-}
-
-fun changeDatabase(name: String): String {
-    database?.saveData()
-    return if (name in databaseNames) {
-        if (!databaseIsLoad[name]!!) {
-            databaseMap[name] = KeyValueDataBase(name)
-            databaseIsLoad[name] = true
-        }
-        database = databaseMap[name]!!
-        basename = name
-        "The database was changed successfully"
-    }
-    else "This database doesn't exist"
-}
-
-fun createDatabase(name: String): String {
-    return if (name in databaseNames)
-        "This database already exists"
-    else {
-        File(name + "_base/").mkdir()
-        File(name + "_base/data_base.txt").createNewFile()
-        File(name + "_base/incorrect_input.txt").createNewFile()
-        File(name + "_base/unconfirmed_add_queries.txt").createNewFile()
-        databaseMap[name] = KeyValueDataBase(name)
-        databaseIsLoad[name] = true
-        databaseNames.add(name)
-
-        database = databaseMap[name]!!
-        basename = name
-        "The database was created successfully"
-    }
-}
-
-fun deleteDatabase(name: String): String {
-    return if (name in databaseNames && name != basename) {
-//        File(name + "_base/data_base.txt").delete()
-//        File(name + "_base/incorrect_input.txt").delete()
-//        File(name + "_base/unconfirmed_add_queries.txt").delete()
-        File(name + "_base/").deleteRecursively()
-        databaseMap.remove(name)
-        databaseIsLoad.remove(name)
-        databaseNames.remove(name)
-
-
-        "The database was deleted successfully"
-    }
-    else return if (name == basename) "This database is open now"
-    else "This database doesn't exist"
-
-}
-
 fun exit() {
     database?.saveData()
     saveDatabases()
     exitProcess(0)
 }
 
-suspend fun gui() = application {
+fun gui() = application {
     loadDatabases()
     Window(
         onCloseRequest = ::exitApplication,

@@ -1,8 +1,5 @@
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.*
 import java.io.File
-import kotlin.concurrent.thread
-import kotlin.system.exitProcess
 
 val databaseMap = mutableMapOf<String, KeyValueDataBase>()
 val databaseNames = mutableSetOf<String>()
@@ -34,19 +31,6 @@ fun saveDatabases() {
     }
 }
 
-//fun changeDatabase(name: String): String {
-//    if (name in databaseNames) {
-//        if (!databaseIsLoad[name]!!) {
-//            databaseMap[name] = KeyValueDataBase(name)
-//            databaseIsLoad[name] = true
-//        }
-//        database = databaseMap[name]!!
-//        basename = name
-//        return "The database was changed successfully"
-//    }
-//    else return "This database not exists"
-//}
-
 suspend fun autoSave() {
     while (true) {
         database?.saveData()
@@ -54,6 +38,103 @@ suspend fun autoSave() {
         saveDatabases()
         delay(10000) // Автосохранение каждые 10 секунд в асинхранном режиме
     }
+}
+
+// проверка корректности key, value, basename, delimiter
+fun isCorrectString(string: String): Boolean {
+    return string.isNotEmpty()
+}
+
+// проверка корректности path
+fun isCorrectPath(path: String): Boolean {
+    return File(path).isFile
+}
+
+fun add(key: String, value: String): String {
+    val element = KeyValueElement(key, value)
+    return database?.addElement(element) ?: "database isn't chosen"
+}
+
+fun delete(key: String): String {
+    return database?.deleteElement(key) ?: "database isn't chosen"
+}
+
+fun get(key: String): String {
+    return if (database == null)
+        "database isn't chosen"
+    else
+        database?.getElement(key) ?: "This key not in a database"
+}
+
+fun replace(key: String, value: String): String {
+    val element = KeyValueElement(key, value)
+    return database?.addElement(element, true) ?: "database isn't chosen"
+}
+
+fun addFromFile(path: String, delimiter: String): String {
+    return database?.fileAdd(path, delimiter) ?: "database isn't chosen"
+}
+
+fun replaceFromFile(path: String, delimiter: String): String {
+    return database?.fileReplace(path, delimiter) ?: "database isn't chosen"
+}
+
+fun deleteFromFile(path: String): String {
+    return database?.fileDelete(path) ?: "database isn't chosen"
+}
+
+fun confirmAddQueries(confirm: Boolean): String {
+    return database?.confirmAllAddQueries(confirm) ?: "database isn't chosen"
+}
+
+fun changeDatabase(name: String): String {
+    database?.saveData()
+    return if (name in databaseNames) {
+        if (!databaseIsLoad[name]!!) {
+            databaseMap[name] = KeyValueDataBase(name)
+            databaseIsLoad[name] = true
+        }
+        database = databaseMap[name]!!
+        basename = name
+        "The database was changed successfully"
+    }
+    else "This database doesn't exist"
+}
+
+fun createDatabase(name: String): String {
+    return if (name in databaseNames)
+        "This database already exists"
+    else {
+        File(name + "_base/").mkdir()
+        File(name + "_base/data_base.txt").createNewFile()
+        File(name + "_base/incorrect_input.txt").createNewFile()
+        File(name + "_base/unconfirmed_add_queries.txt").createNewFile()
+        databaseMap[name] = KeyValueDataBase(name)
+        databaseIsLoad[name] = true
+        databaseNames.add(name)
+
+        database = databaseMap[name]!!
+        basename = name
+        "The database was created successfully"
+    }
+}
+
+fun deleteDatabase(name: String): String {
+    return if (name in databaseNames && name != basename) {
+//        File(name + "_base/data_base.txt").delete()
+//        File(name + "_base/incorrect_input.txt").delete()
+//        File(name + "_base/unconfirmed_add_queries.txt").delete()
+        File(name + "_base/").deleteRecursively()
+        databaseMap.remove(name)
+        databaseIsLoad.remove(name)
+        databaseNames.remove(name)
+
+
+        "The database was deleted successfully"
+    }
+    else return if (name == basename) "This database is open now"
+    else "This database doesn't exist"
+
 }
 
 //suspend fun userInterface() {

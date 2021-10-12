@@ -1,5 +1,10 @@
 import java.io.File
 
+// Имена файлов ввода - вывода
+const val incorrectInput = "/incorrect_input.txt"
+const val unconfirmedAddQueries = "/unconfirmed_add_queries.txt"
+const val bootFile = "/data_base.txt"
+
 // Пара ключ-значение
 class KeyValueElement {
     // поля
@@ -108,15 +113,18 @@ class KeyValueDataBase// При создании загружает данные
 
     // добавить элемент
     fun addElement(element: KeyValueElement, replace: Boolean = false): String {
-        if (map.containsKey(element.key)) { // такой элемент уже существует
+        return if (map.containsKey(element.key)) { // такой элемент уже существует
             if (replace) {
                 map[element.key] = element.value // всё равно заменить
-                return "Element was replaced successfully"
+                "Element was replaced successfully"
+            } else {
+                // добавить в неподтверждённое
+                File(directory + unconfirmedAddQueries).appendText("$element\n")
+                "This key is already in the database.\nReplace it?"
             }
-            return "This key already in the database"
         } else {
             map[element.key] = element.value
-            return "Element was added successfully"
+            "Element was added successfully"
         }
     }
 
@@ -126,7 +134,7 @@ class KeyValueDataBase// При создании загружает данные
             map.remove(key)
             "Element was deleted successfully"
         } else {
-            "This key already not in database"
+            "This key is already not in database"
         }
     }
 
@@ -143,12 +151,18 @@ class KeyValueDataBase// При создании загружает данные
     // выполняет addElement для всех запросов в файле
     fun fileAdd(filename: String, delimiter: String = " -> "): String {
         val data = readData(filename, delimiter) // некорректные запросы автоматически попали в incorrect_input.txt
+        var countUnconfirmed = 0
         for (element in data) {
             // запросы, пытающиеся сделать замену существующих элементов попадают в unconfirmed_add_query.txt
-            if (addElement(element) == "This key already in the database")
+            if (addElement(element) == "This key is already in the database") {
                 File(directory + unconfirmedAddQueries).appendText("$element\n")
+                countUnconfirmed++
+            }
         }
-        return "Success" // добавить логи в дальнейшем
+        return if (countUnconfirmed == 0)
+            "All elements were added successfully"
+        else
+            "Query contain $countUnconfirmed elements which are already in the database\n Replace them all?"
     }
 
     // выполняет replaceElement (т.е. addElement(replace = true)) для всех запросов в файле
@@ -157,7 +171,7 @@ class KeyValueDataBase// При создании загружает данные
         for (element in data) {
             addElement(element, true)
         }
-        return "Success" // добавить логи в дальнейшем
+        return "All elements were replaced successfully"
     }
 
     // выполняет deleteElement для всех запросов в файле
@@ -166,12 +180,14 @@ class KeyValueDataBase// При создании загружает данные
         for (element in data) {
             deleteElement(element)
         }
-        return "Success" // добавить логи в дальнейшем
+        return "All elements were deleted successfully"
     }
 
-    fun confirmAllAddQueries() {
-        fileReplace(directory + unconfirmedAddQueries)
+    fun confirmAllAddQueries(confirm: Boolean): String {
+        if (confirm)
+            fileReplace(directory + unconfirmedAddQueries)
         File(directory + unconfirmedAddQueries).writeText("")
+        return "All elements were replaced successfully"
     }
 
 }
