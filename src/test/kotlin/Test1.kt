@@ -75,11 +75,11 @@ internal class Test4 {
 
         changeDatabase("testing_base_4.1")
         addFromFile(
-        "testing_base_4.1_base\\add_queries.txt",
+        "testing_base_4.1_base/add_queries.txt",
         ", ")
         changeDatabase("testing_base_4.2")
         addFromFile(
-        "testing_base_4.1_base\\add_queries.txt",
+        "testing_base_4.1_base/add_queries.txt",
         " -> ")
         val incorrect2 = File("testing_base_4.2_base$incorrectInput").readLines()
         val unconfirmed2 = File("testing_base_4.2_base$unconfirmedAddQueries").readLines()
