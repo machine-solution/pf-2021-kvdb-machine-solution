@@ -9,7 +9,7 @@ internal class Test1 {
         val data = kvdb.readData("testing_base_1_base$bootFile")
         assertEquals(KeyValueElement("1", "1"), data[0])
         assertEquals(KeyValueElement("2", "2 -> 2"), data[1])
-        assertEquals("This key already in the database", kvdb.addElement(KeyValueElement("1", "1 -> 1")))
+        assertEquals("This key is already in the database.\nReplace it?", kvdb.addElement(KeyValueElement("1", "1 -> 1")))
         assertEquals("1", kvdb.getElement("1"))
         kvdb.deleteElement("1")
         assertEquals(null, kvdb.getElement("1"))
@@ -75,11 +75,11 @@ internal class Test4 {
 
         changeDatabase("testing_base_4.1")
         addFromFile(
-        "C:\\Users\\Dusha\\IdeaProjects\\pf-2021-kvdb-machine-solution\\testing_base_4.1_base\\add_queries.txt",
+        "testing_base_4.1_base\\add_queries.txt",
         ", ")
         changeDatabase("testing_base_4.2")
         addFromFile(
-        "C:\\Users\\Dusha\\IdeaProjects\\pf-2021-kvdb-machine-solution\\testing_base_4.1_base\\add_queries.txt",
+        "testing_base_4.1_base\\add_queries.txt",
         " -> ")
         val incorrect2 = File("testing_base_4.2_base$incorrectInput").readLines()
         val unconfirmed2 = File("testing_base_4.2_base$unconfirmedAddQueries").readLines()

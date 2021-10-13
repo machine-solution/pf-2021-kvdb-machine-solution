@@ -83,7 +83,7 @@ fun deleteFromFile(path: String): String {
     return database?.fileDelete(path) ?: "database isn't chosen"
 }
 
-fun confirmAddQueries(confirm: Boolean): String {
+fun confirmAddQueries(confirm: Boolean = true): String {
     return database?.confirmAllAddQueries(confirm) ?: "database isn't chosen"
 }
 

@@ -313,7 +313,7 @@ fun gui() = application {
                             delimiter.value = " -> "
                             newBasename.value = ""
                             args.value = Arg.NULL
-                            if (log.value.substring(0,13) == "Query contain" ||
+                            if ((log.value.length >= 13 && log.value.substring(0,13) == "Query contain") ||
                                     log.value == "This key is already in the database.\nReplace it?")
                                 cmd.value = Command.CONFIRM
                             else

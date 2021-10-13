@@ -183,7 +183,7 @@ class KeyValueDataBase// При создании загружает данные
         return "All elements were deleted successfully"
     }
 
-    fun confirmAllAddQueries(confirm: Boolean): String {
+    fun confirmAllAddQueries(confirm: Boolean = true): String {
         if (confirm)
             fileReplace(directory + unconfirmedAddQueries)
         File(directory + unconfirmedAddQueries).writeText("")
